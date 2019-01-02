@@ -96,9 +96,6 @@ leftstick[3] = 0
 
 //Set the epsilon value for floating point numbers
 math_set_epsilon(0.00001)
-
-//Disable application surface automatic drawing
-application_surface_draw_enable(0)
 </string>
           </argument>
         </arguments>
@@ -126,7 +123,7 @@ application_surface_draw_enable(0)
 //Apply fullscreen
 window_set_fullscreen(fullscreen)
 
-//Apply filtering and VSync
+//Apply VSync
 event_user(1)
 </string>
           </argument>
@@ -481,35 +478,11 @@ else if keyboard_check_pressed(ord('F'))
     showfps = !showfps
 }
 
-//Turn off filtering if ALT+1 is pressed
-else if keyboard_check_pressed(ord('1'))
-{
-    filter = 0
-    message = "NO FILTERING"
-    event_user(1)
-}
-
-//Turn on HQ2X filtering if ALT+2 is pressed
-else if keyboard_check_pressed(ord('2'))
-{
-    filter = 1
-    message = "HQ2X FILTERING"
-    event_user(1)
-}
-
-//Turn on HQ4X filtering if ALT+3 is pressed
-else if keyboard_check_pressed(ord('3'))
-{
-    filter = 2
-    message = "HQ4X FILTERING"
-    event_user(1)
-}
-
 //Show hotkey help
 else
 {
     if alarm[3] &lt; 1
-        message = "ALT+R: RESTART GAME#ALT+ENTER: FULL SCREEN#ALT+F4: QUIT GAME#ALT+1: TURN OFF FILTERING#ALT+2: TURN ON HQ2X FILTERING#ALT+3: TURN ON HQ4X FILTERING#ALT+V: VSYNC#ALT+F: FPS DISPLAY#ALT+G: GAMEPAD TOGGLE";
+        message = "ALT+R: RESTART GAME#ALT+ENTER: FULL SCREEN#ALT+F4: QUIT GAME#ALT+V: VSYNC#ALT+F: FPS DISPLAY#ALT+G: GAMEPAD TOGGLE";
     exit
 }
 
@@ -564,44 +537,29 @@ for(var i = 0; i &lt; array_length_1d(mobile_keys); i++)
             <kind>1</kind>
             <string>///Set up on screen controls
 
-//Temporary variable
-var s
-
-//Normal
-if filter = 0
-    s = 1
-
-//HQ2X
-else if filter = 1
-    s = 2
-
-//HQ4X
-else if filter = 2
-    s = 4
-
 //Up
-mobile_keys[0] = virtual_key_add(34*s,118*s,32*s,32*s,vk_up)
+mobile_keys[0] = virtual_key_add(34,118,32,32,vk_up)
 
 //Down
-mobile_keys[1] = virtual_key_add(34*s,182*s,32*s,32*s,vk_down)
+mobile_keys[1] = virtual_key_add(34,182,32,32,vk_down)
 
 //Left
-mobile_keys[2] = virtual_key_add(2*s,150*s,32*s,32*s,vk_left)
+mobile_keys[2] = virtual_key_add(2,150,32,32,vk_left)
 
 //Right
-mobile_keys[3] = virtual_key_add(66*s,150*s,32*s,32*s,vk_right)
+mobile_keys[3] = virtual_key_add(66,150,32,32,vk_right)
 
 //Jump
-mobile_keys[4] = virtual_key_add(350*s,150*s,32*s,32*s,vk_shift)
+mobile_keys[4] = virtual_key_add(350,150,32,32,vk_shift)
 
 //Run
-mobile_keys[5] = virtual_key_add(310*s,150*s,32*s,32*s,vk_control)
+mobile_keys[5] = virtual_key_add(310,150,32,32,vk_control)
 
 //Pause
-mobile_keys[6] = virtual_key_add(350*s,2*s,32*s,32*s,vk_enter)
+mobile_keys[6] = virtual_key_add(350,2,32,32,vk_enter)
 
 //Inventory
-mobile_keys[7] = virtual_key_add(2*s,2*s,32*s,32*s,vk_space)
+mobile_keys[7] = virtual_key_add(2,2,32,32,vk_space)
 </string>
           </argument>
         </arguments>
@@ -626,29 +584,8 @@ mobile_keys[7] = virtual_key_add(2*s,2*s,32*s,32*s,vk_space)
             <kind>1</kind>
             <string>///Set up the screen to be displayed
 
-//Temporary variable
-var s
-
-//Normal
-if filter = 0
-    s = 1
-
-//HQ2X
-else if filter = 1
-    s = 2
-
-//HQ4X
-else if filter = 2
-    s = 4
-
 //Reset display
 display_reset(0,vsync)
-
-//Set up the window
-window_set_size(view_wview[0]*s,view_hview[0]*s)
-
-//Set up the display
-display_set_gui_size(view_wview[0]*s,view_hview[0]*s)
 
 //Center the window
 alarm[2] = 1
@@ -786,17 +723,13 @@ if os_type = os_android or os_type = os_ios
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>///Save Fullscreen + Filtering + VSync Settings
+            <string>///Save Fullscreen + VSync Settings
 
 //Open the file
 var file = file_text_open_write("Settings.dat")
 
 //Save fullscreen settings
 file_text_write_string(file,string(fullscreen))
-file_text_writeln(file)
-
-//Save filtering settings
-file_text_write_string(file,string(filter))
 file_text_writeln(file)
 
 //Save vsync settings
@@ -826,7 +759,7 @@ file_text_close(file)
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>///Load Fullscreen + Filtering + VSync Settings
+            <string>///Load Fullscreen + VSync Settings
 if file_exists("Settings.dat")
 {
 
@@ -835,10 +768,6 @@ if file_exists("Settings.dat")
 
     //Set fullscreen mode based on the read value
     fullscreen = real(file_text_read_string(file))
-    file_text_readln(file)
-
-    //Set filtering mode based on the read value
-    filter = real(file_text_read_string(file))
     file_text_readln(file)
 
     //Set vsync based on the read value
@@ -853,18 +782,6 @@ else
 
     //Fullscreen is off by default
     fullscreen = 0
-
-    //Filtering is off if the shaders fail to compile
-    if not shader_is_compiled(sha_hq2x)
-    or not shader_is_compiled(sha_hq4x)
-        filter = 0
-
-    //Set the default to HQ4X only if the screen is big enough to fit it
-    else if display_get_width() &gt;= 1536
-    and display_get_height() &gt;= 864
-        filter = 2
-    else
-        filter = 1
 
     //VSync is off by default
     vsync = 0
@@ -901,30 +818,7 @@ alarm[4] = 200
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>///Deals with the application surface, filtering, and fading
-draw_enable_alphablend(0)
-
-//No Filter
-if filter = 0
-    draw_surface(application_surface,0,0)
-
-//HQ2X Filtering
-else if filter = 1
-{
-    shader_set(sha_hq2x)
-    draw_surface_stretched(application_surface,0,0,view_wview[0]*2,view_hview[0]*2)
-    shader_reset()
-}
-
-//HQ4X Filtering
-else if filter = 2
-{
-    shader_set(sha_hq4x)
-    draw_surface_stretched(application_surface,0,0,view_wview[0]*4,view_hview[0]*4)
-    shader_reset()
-}
-
-draw_enable_alphablend(1)
+            <string>///Deals with fading
 
 //Fades the screen to and from black
 if done &lt; 1
